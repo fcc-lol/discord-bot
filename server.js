@@ -20,6 +20,7 @@ if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID || !ANTHROPIC_API_KEY) {
 const discord = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
