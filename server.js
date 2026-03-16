@@ -79,11 +79,11 @@ function addMessage(channelId, role, content) {
 async function registerCommands() {
   const commands = [
     new SlashCommandBuilder()
-      .setName('claude-clear')
-      .setDescription('Clear Claude\'s conversation history for this channel'),
+      .setName('bot-clear')
+      .setDescription('Clear the bot\'s conversation history for this channel'),
     new SlashCommandBuilder()
-      .setName('claude-help')
-      .setDescription('Show how to use the Claude bot'),
+      .setName('bot-help')
+      .setDescription('Show how to use the bot'),
   ].map(cmd => cmd.toJSON());
 
   const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
@@ -188,7 +188,7 @@ async function fetchProjectsByTag(tag) {
 }
 
 // ---------------------------------------------------------------------------
-// Claude tools
+// AI tools
 // ---------------------------------------------------------------------------
 const TOOLS = [
   {
@@ -387,7 +387,7 @@ async function runTool(name, input, { channelId, username } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Keep typing indicator alive while waiting for Claude
+// Keep typing indicator alive while waiting for a response
 // ---------------------------------------------------------------------------
 function startTyping(channel) {
   channel.sendTyping().catch(() => {});
@@ -407,7 +407,7 @@ function loadFile(filePath) {
 }
 
 // ---------------------------------------------------------------------------
-// Call Claude with tool-use agentic loop
+// Agentic loop
 // ---------------------------------------------------------------------------
 function buildSystemPrompt(messageTime) {
   return [
@@ -418,7 +418,7 @@ function buildSystemPrompt(messageTime) {
   ].filter(Boolean).join('\n');
 }
 
-async function askClaude(channelId, userTag, userText, messageTime) {
+async function askAI(channelId, userTag, userText, messageTime) {
   addMessage(channelId, 'user', `${userTag}: ${userText}`);
 
   // Build a local messages array for the agentic loop (tool turns are not persisted to history)
@@ -495,7 +495,7 @@ discord.on('messageCreate', async (message) => {
   const stopTyping = startTyping(message.channel);
 
   try {
-    const reply = await askClaude(message.channelId, message.author.username, content, message.createdAt.toISOString());
+    const reply = await askAI(message.channelId, message.author.username, content, message.createdAt.toISOString());
     stopTyping();
 
     const chunks = splitMessage(reply);
@@ -505,28 +505,28 @@ discord.on('messageCreate', async (message) => {
     }
   } catch (err) {
     stopTyping();
-    console.error('Claude API error:', err);
-    await message.reply('Sorry, something went wrong reaching Claude. Please try again.');
+    console.error('API error:', err);
+    await message.reply('Sorry, something went wrong. Please try again.');
   }
 });
 
 discord.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'claude-clear') {
+  if (interaction.commandName === 'bot-clear') {
     clearHistory(interaction.channelId);
     await interaction.reply({ content: 'Conversation history cleared for this channel.', ephemeral: true });
   }
 
-  if (interaction.commandName === 'claude-help') {
+  if (interaction.commandName === 'bot-help') {
     await interaction.reply({
       content: [
-        '**Claude Bot — Quick Guide**',
+        '**Bot — Quick Guide**',
         '',
-        '• **@Claude <question>** — Ask Claude anything',
-        '• Claude remembers the last conversation in each channel',
-        '• **/claude-clear** — Reset Claude\'s memory for this channel',
-        '• **/claude-help** — Show this message',
+        '• **@mention <question>** — Ask the bot anything',
+        '• The bot remembers the last conversation in each channel',
+        '• **/bot-clear** — Reset the bot\'s memory for this channel',
+        '• **/bot-help** — Show this message',
       ].join('\n'),
       ephemeral: true,
     });

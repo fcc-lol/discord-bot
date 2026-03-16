@@ -1,7 +1,7 @@
 {
   "name": "discord-bot",
   "version": "1.0.0",
-  "description": "Discord bot powered by Claude AI — @mention to chat",
+  "description": "Discord bot — @mention to chat",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
